@@ -6,9 +6,24 @@
     <style>
         body {
             font-family: sans-serif;
-            text-align: center;
             padding: 40px;
             background-color: #f0f0f0;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        .box {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
         }
         .button {
             padding: 15px 30px;
@@ -31,25 +46,17 @@
         #micButton.recording {
             background-color: #f44336;
         }
+        #serveButton {
+            background-color: #FF9800;
+        }
         #transcription {
-            margin-top: 30px;
-            background-color: white;
-            padding: 20px;
+            margin-top: 20px;
+            padding: 15px;
             border-radius: 8px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            background-color: #f9f9f9;
         }
         #queueBox {
-            margin-top: 30px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
         }
         #queueBox ul {
             list-style: none;
@@ -62,16 +69,43 @@
         #queueBox li:last-child {
             border-bottom: none;
         }
+        #nextPerson {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            font-size: 18px;
+        }
+        @media (max-width: 800px) {
+            .container {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Audio Transcriber</h1>
-    <button id="recordButton" class="button">Start Recording</button>
-    <button id="micButton" class="button">Record with Microphone</button>
-    <div id="transcription">Transcription will appear here...</div>
-    <div id="queueBox">
-        <h2>Queue</h2>
-        <ul id="queueList"></ul>
+    <div class="container">
+        <div class="box">
+            <h1>Audio Transcriber</h1>
+            <button id="recordButton" class="button">Start Recording</button>
+            <button id="micButton" class="button">Record with Microphone</button>
+            <div id="transcription">Transcription will appear here...</div>
+            <div id="queueBox">
+                <h2>Queue</h2>
+                <ul id="queueList"></ul>
+            </div>
+        </div>
+        <div class="box">
+            <h2>Serve Next</h2>
+            <form action="/serve">
+                <button type="submit" id="serveButton" class="button">Atender</button>
+            </form>
+            {% if next_person %}
+                <p id="nextPerson">{{next_person}}</p>
+            {% else %}
+                <p id ="nextPerson">The queue is empty</p>
+            {% endif %}
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

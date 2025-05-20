@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import speech_recognition as sr
 import os
 from pydub import AudioSegment
@@ -8,7 +8,7 @@ from controllers.personsHandler import PersonHandler
 from transcriptor import transcribe_audio
 
 # Explicitly set FFmpeg path
-AudioSegment.converter = r"C:\\ffmpeg-7.1.1-essentials_build\\bin\\ffmpeg.exe"  # Adjust to C:\ffmpeg\ffmpeg.exe if no bin folder
+AudioSegment.converter = r"C:\\ffmpeg-7.1.1-essentials_build\\bin\\ffmpeg.exe"  # Update to your actual path
 
 app = Flask(__name__)
 
@@ -21,11 +21,21 @@ person_handler = PersonHandler()
 
 UPLOAD_FOLDER = 'Uploads'
 if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+    try:
+        os.makedirs(UPLOAD_FOLDER)
+        logger.info(f"Created Uploads folder: {UPLOAD_FOLDER}")
+    except PermissionError as e:
+        logger.error(f"Failed to create Uploads folder: {e}")
+        raise
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.route('/serve')
+def serve():
+    person_handler.serve_person()
+    return redirect(url_for('index'))
 @app.route('/')
 def index():
+    next_person = person_handler.show_next_person()
     return render_template('index.html')
 
 @app.route('/transcribe', methods=['POST'])
@@ -40,6 +50,11 @@ def transcribe():
     wav_path = webm_path.replace('.webm', '.wav')
 
     try:
+        # Check write permissions
+        if not os.access(app.config['UPLOAD_FOLDER'], os.W_OK):
+            logger.error(f"No write permission for Uploads folder: {UPLOAD_FOLDER}")
+            return jsonify({'error': 'No write permission for Uploads folder'}), 500
+
         audio_file.save(webm_path)
         logger.info(f"📥 Received and saved file: {webm_path}")
 
@@ -50,7 +65,7 @@ def transcribe():
             logger.info(f"✅ Converted to WAV: {wav_path}")
         except Exception as e:
             logger.error(f"Audio conversion failed: {str(e)}")
-            raise Exception(f"Audio conversion failed, ensure ffmpeg is installed: {str(e)}")
+            raise Exception(f"Audio conversion failed, ensure ffmpeg is accessible: {str(e)}")
 
         # Transcribe with speech_recognition
         recognizer = sr.Recognizer()
@@ -69,6 +84,9 @@ def transcribe():
             'queue': [str(p) for p in queue]
         })
 
+    except PermissionError as e:
+        logger.error(f"Permission error: {e}")
+        return jsonify({'error': f'Permission error: {e}'}), 500
     except sr.UnknownValueError:
         logger.warning("Speech was not understood")
         return jsonify({'error': 'Could not understand the audio'}), 400
@@ -85,8 +103,10 @@ def transcribe():
                 if os.path.exists(f):
                     os.remove(f)
                     logger.info(f"🧹 Deleted: {f}")
+            except PermissionError as e:
+                logger.error(f"Failed to delete {f}: {e}")
             except Exception as e:
-                logger.error(f"Failed to delete {f}: {str(e)}")
+                logger.error(f"Failed to delete {f}: {e}")
 
 @app.route('/mic_transcribe', methods=['POST'])
 def mic_transcribe():
@@ -109,6 +129,19 @@ def mic_transcribe():
 def get_queue():
     queue = person_handler.get_queue()
     return jsonify({'queue': [str(p) for p in queue]})
+
+@app.route('/serve', methods=['POST'])
+def serve_person():
+    try:
+        person = person_handler.serve_person()
+        queue = person_handler.get_queue()
+        return jsonify({
+            'served': str(person) if person else None,
+            'queue': [str(p) for p in queue]
+        })
+    except Exception as e:
+        logger.error(f"Serve error: {e}")
+        return jsonify({'error': f'Serve error: {e}'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
