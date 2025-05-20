@@ -36,7 +36,7 @@ def serve():
 @app.route('/')
 def index():
     next_person = person_handler.show_next_person()
-    return render_template('index.html')
+    return render_template('index.html', next_person=next_person)
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe():

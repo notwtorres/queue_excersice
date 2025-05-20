@@ -6,17 +6,20 @@ const recordButton = document.getElementById('recordButton');
 const micButton = document.getElementById('micButton');
 const transcriptionDiv = document.getElementById('transcription');
 const queueList = document.getElementById('queueList');
+const nextPersonP = document.getElementById('nextPerson'); // ✅ Elemento de siguiente ciudadano
 
 function updateQueue(queue) {
     queueList.innerHTML = '';
     if (queue.length === 0) {
         queueList.innerHTML = '<li>No names in queue</li>';
+        nextPersonP.textContent = 'The queue is empty'; // ✅ También actualiza el siguiente
     } else {
         queue.forEach(name => {
             const li = document.createElement('li');
             li.textContent = name;
             queueList.appendChild(li);
         });
+        nextPersonP.textContent = queue[0]; // ✅ Muestra el primero en la cola
     }
 }
 
@@ -63,7 +66,7 @@ recordButton.addEventListener('click', async () => {
                         transcriptionDiv.textContent = `Error: ${result.error}`;
                     } else {
                         transcriptionDiv.textContent = `Transcribed: ${result.text}`;
-                        updateQueue(result.queue);
+                        updateQueue(result.queue); // ✅ Ya actualiza `nextPerson` también
                     }
                     console.log("✅ Transcription result:", result);
                 } catch (error) {
@@ -99,7 +102,7 @@ micButton.addEventListener('click', async () => {
                 transcriptionDiv.textContent = `Error: ${result.error}`;
             } else {
                 transcriptionDiv.textContent = `Transcribed: ${result.text}`;
-                updateQueue(result.queue);
+                updateQueue(result.queue); // ✅ Ya actualiza también nextPerson
             }
             console.log("✅ Microphone transcription result:", result);
         } catch (error) {
@@ -110,5 +113,6 @@ micButton.addEventListener('click', async () => {
         }
     }
 });
+
 
 
