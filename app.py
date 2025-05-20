@@ -8,7 +8,8 @@ from controllers.personsHandler import PersonHandler
 from transcriptor import transcribe_audio
 
 # Explicitly set FFmpeg path
-AudioSegment.converter = r"C:\\ffmpeg-7.1.1-essentials_build\\bin\\ffmpeg.exe"  # Update to your actual path
+ffmpeg_path = os.path.join(os.path.dirname(__file__), 'ffmpeg', 'bin', 'ffmpeg.exe')
+AudioSegment.converter = ffmpeg_path  # Update to your actual path
 
 app = Flask(__name__)
 
