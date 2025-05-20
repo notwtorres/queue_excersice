@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Transcriber</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 40px;
+            background-color: #f0f0f0;
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #recordButton {
+            background-color: #4CAF50;
+        }
+        #recordButton.recording {
+            background-color: #f44336;
+        }
+        #micButton {
+            background-color: #2196F3;
+        }
+        #micButton.recording {
+            background-color: #f44336;
+        }
+        #transcription {
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        #queueBox {
+            margin-top: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        #queueBox ul {
+            list-style: none;
+            padding: 0;
+        }
+        #queueBox li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        #queueBox li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Transcriber</h1>
+    <button id="recordButton" class="button">Start Recording</button>
+    <button id="micButton" class="button">Record with Microphone</button>
+    <div id="transcription">Transcription will appear here...</div>
+    <div id="queueBox">
+        <h2>Queue</h2>
+        <ul id="queueList"></ul>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
